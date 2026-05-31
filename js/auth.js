@@ -1,5 +1,5 @@
-// mock API link from the swagger docs
-const API_BASE = "https://virtserver.swaggerhub.com/na-6b2/SmallProject_API/1.0.0";
+// digitalocean droplet
+const API_BASE = "http://104.248.232.237";
 
 // login button
 async function handleLogin() {
