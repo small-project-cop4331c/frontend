@@ -35,6 +35,16 @@ async function handleLogin() {
     const data = await response.json();
 
     if (response.ok) {
+      // save session info for the contacts page
+      if (data.user) {
+        sessionStorage.setItem("userId", data.user.id);
+        sessionStorage.setItem("userName", data.user.firstName + " " + data.user.lastName);
+        sessionStorage.setItem("userEmail", data.user.email);
+      }
+      if (data.token) {
+        sessionStorage.setItem("token", data.token);
+      }
+
       window.location.href = "contacts.html";
     } else {
       if (data.error) {
