@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Manager</title>
+</head>
+<body>
+
+<!-- auth helpers need to load first so isLoggedIn() is available -->
+<script src="js/auth.js"></script>
+
+<script>
+  // redirect based on whether the user is already logged in
+  if (isLoggedIn()) {
+    window.location.href = "contacts.html";
+  } else {
+    window.location.href = "login.html";
+  }
+</script>
+
+</body>
+</html>

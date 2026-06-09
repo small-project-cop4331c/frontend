@@ -1,5 +1,4 @@
-// digitalocean droplet 
-const API_BASE = "http://stealingyourinfo.xyz";
+// API_BASE is defined in auth.js, which loads before this file
 
 let contactModal;
 let deleteModal;
@@ -18,12 +17,12 @@ document.addEventListener("DOMContentLoaded", function() {
   deleteModal = new bootstrap.Modal(document.getElementById("deleteModal"));
 
   // kick back to login if we dont have a session
-  if (!sessionStorage.getItem("token")) {
+  if (!isLoggedIn()) {
     window.location.href = "login.html";
     return;
   }
 
-  const fullName = sessionStorage.getItem("userName");
+  const fullName = localStorage.getItem("userName");
   if (fullName) {
     document.getElementById("navUsername").textContent = "Hello, " + fullName;
   }
@@ -44,10 +43,10 @@ function handleSearch() {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": "Bearer " + sessionStorage.getItem("token")
+      "Authorization": "Bearer " + getToken()
     },
     body: JSON.stringify({
-      userId: sessionStorage.getItem("userId"),
+      userId: localStorage.getItem("userId"),
       search: query
     })
   })
@@ -137,10 +136,10 @@ function openEditModal(contactId) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": "Bearer " + sessionStorage.getItem("token")
+      "Authorization": "Bearer " + getToken()
     },
     body: JSON.stringify({
-      userId: sessionStorage.getItem("userId"),
+      userId: localStorage.getItem("userId"),
       id: contactId
     })
   })
@@ -198,10 +197,10 @@ function handleSaveContact() {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": "Bearer " + sessionStorage.getItem("token")
+      "Authorization": "Bearer " + getToken()
     },
     body: JSON.stringify({
-      userId: sessionStorage.getItem("userId"),
+      userId: localStorage.getItem("userId"),
       id: id,
       firstName: firstName,
       lastName: lastName,
@@ -265,10 +264,10 @@ function confirmDelete() {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": "Bearer " + sessionStorage.getItem("token")
+      "Authorization": "Bearer " + getToken()
     },
     body: JSON.stringify({
-      userId: sessionStorage.getItem("userId"),
+      userId: localStorage.getItem("userId"),
       id: id
     })
   })
@@ -296,7 +295,7 @@ function confirmDelete() {
 
 
 function handleLogout() {
-  sessionStorage.clear();
+  clearAuth();
   window.location.href = "login.html";
 }
 

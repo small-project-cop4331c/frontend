@@ -1,13 +1,40 @@
 // digitalocean droplet
 const API_BASE = "http://stealingyourinfo.xyz";
 
+// auth helpers
+// using localStorage 
+
+
+function saveAuth(user, token) {
+  localStorage.setItem("token", token);
+  localStorage.setItem("userId", user.id);
+  localStorage.setItem("userName", user.firstName + " " + user.lastName);
+  localStorage.setItem("userEmail", user.email);
+}
+
+function getToken() {
+  return localStorage.getItem("token");
+}
+
+function clearAuth() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("userId");
+  localStorage.removeItem("userName");
+  localStorage.removeItem("userEmail");
+}
+
+function isLoggedIn() {
+  return !!getToken();
+}
+
+
 // login button
 async function handleLogin() {
   const email = document.getElementById("loginEmail").value;
   const password = document.getElementById("loginPassword").value;
   const loginError = document.getElementById("loginError");
 
-  // clear old message 
+  // clear old message
   loginError.textContent = "";
   loginError.style.display = "none";
 
@@ -35,14 +62,8 @@ async function handleLogin() {
     const data = await response.json();
 
     if (response.ok) {
-      // save session info for the contacts page
-      if (data.user) {
-        sessionStorage.setItem("userId", data.user.id);
-        sessionStorage.setItem("userName", data.user.firstName + " " + data.user.lastName);
-        sessionStorage.setItem("userEmail", data.user.email);
-      }
-      if (data.token) {
-        sessionStorage.setItem("token", data.token);
+      if (data.user && data.token) {
+        saveAuth(data.user, data.token);
       }
 
       window.location.href = "contacts.html";
@@ -80,8 +101,6 @@ async function handleRegister() {
   registerSuccess.textContent = "";
   registerSuccess.style.display = "none";
 
-
-  
   // checks before sending to API
   if (
     firstName === "" ||
