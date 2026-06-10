@@ -1,5 +1,5 @@
 // digitalocean droplet
-const API_BASE = "http://stealingyourinfo.xyz";
+const API_BASE = "https://stealingyourinfo.xyz";
 
 // auth helpers
 // using localStorage 
