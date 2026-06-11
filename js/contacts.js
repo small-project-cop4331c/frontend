@@ -1,16 +1,40 @@
-// API_BASE is defined in auth.js, which loads before this file
+// API_BASE is defined in auth.js
 
 let contactModal;
 let deleteModal;
 
-// temp fake contacts list
-let allContacts = [
-  { id: 1, firstName: "John", lastName: "Smith", email: "john@email.com", phone: "555-1234", dateCreated: "2025-01-10" },
-  { id: 2, firstName: "Jane", lastName: "Jones", email: "jane@email.com", phone: "555-5678", dateCreated: "2025-02-14" },
-  { id: 3, firstName: "Steve", lastName: "Jobs", email: "steve@email.com", phone: "555-9999", dateCreated: "2025-03-01" }
-];
-let nextContactId = 4;
 
+// helpers 
+
+function authHeaders() {
+  return {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer " + getToken()
+  };
+}
+
+
+function mapContactFromApi(c) {
+  return {
+    id: c.id,
+    firstName: c.first_name,
+    lastName: c.last_name,
+    email: c.email_address,
+    phone: c.phone_number
+  };
+}
+
+function mapContactToApi(firstName, lastName, email, phone) {
+  return {
+    first_name: firstName,
+    last_name: lastName,
+    email_address: email,
+    phone_number: phone
+  };
+}
+
+
+//init
 
 document.addEventListener("DOMContentLoaded", function() {
   contactModal = new bootstrap.Modal(document.getElementById("contactModal"));
@@ -29,7 +53,9 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 
-// search runs when user clicks Search or presses Enter
+//search
+
+// runs when user clicks search or presses enter
 function handleSearch() {
   const query = document.getElementById("searchInput").value.trim();
 
@@ -38,45 +64,22 @@ function handleSearch() {
     return;
   }
 
-  /*
-  fetch(API_BASE + "/api/searchContacts", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + getToken()
-    },
-    body: JSON.stringify({
-      userId: localStorage.getItem("userId"),
-      search: query
-    })
+  const url = API_BASE + "/api/contacts?search=" + encodeURIComponent(query);
+
+  fetch(url, {
+    method: "GET",
+    headers: authHeaders()
   })
-  .then(res => res.json())
-  .then(data => {
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
     if (data.error) {
       showPageMessage(data.error, true);
       return;
     }
-    renderContacts(data.contacts);
+    renderContacts(data.contacts.map(mapContactFromApi));
   })
-  .catch(() => {
+  .catch(function() {
     showPageMessage("Could not connect to server", true);
-  });
-  */
-
-  const results = filterContacts(query);
-  renderContacts(results);
-}
-
-
-// case insensitive substring match on name fields
-function filterContacts(query) {
-  const lower = query.toLowerCase();
-
-  return allContacts.filter(function(c) {
-    return (
-      c.firstName.toLowerCase().includes(lower) ||
-      c.lastName.toLowerCase().includes(lower)
-    );
   });
 }
 
@@ -86,12 +89,12 @@ function renderContacts(contacts) {
   const query = document.getElementById("searchInput").value.trim();
 
   if (query.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Search for a contact above</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Search for a contact above</td></tr>';
     return;
   }
 
   if (contacts.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No contacts found</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No contacts found</td></tr>';
     return;
   }
 
@@ -100,9 +103,8 @@ function renderContacts(contacts) {
     rows += "<tr>";
     rows += "<td>" + c.firstName + "</td>";
     rows += "<td>" + c.lastName + "</td>";
-    rows += "<td>" + c.email + "</td>";
-    rows += "<td>" + c.phone + "</td>";
-    rows += "<td>" + c.dateCreated + "</td>";
+    rows += "<td>" + (c.email || "") + "</td>";
+    rows += "<td>" + (c.phone || "") + "</td>";
     rows += '<td>';
     rows += '<button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="openEditModal(' + c.id + ')">Edit</button>';
     rows += '<button type="button" class="btn btn-sm btn-outline-danger" onclick="openDeleteModal(' + c.id + ')">Delete</button>';
@@ -113,6 +115,8 @@ function renderContacts(contacts) {
   tbody.innerHTML = rows;
 }
 
+
+//add / edit modal
 
 function openAddModal() {
   document.getElementById("contactModalLabel").textContent = "Add Contact";
@@ -131,40 +135,22 @@ function openEditModal(contactId) {
   document.getElementById("contactModalLabel").textContent = "Edit Contact";
   hideModalError();
 
-  /*
-  fetch(API_BASE + "/api/getContact", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + getToken()
-    },
-    body: JSON.stringify({
-      userId: localStorage.getItem("userId"),
-      id: contactId
-    })
+  fetch(API_BASE + "/api/contacts/" + contactId, {
+    method: "GET",
+    headers: authHeaders()
   })
-  .then(res => res.json())
-  .then(data => {
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
     if (data.error) {
       showPageMessage(data.error, true);
       return;
     }
-    fillContactForm(data);
+    fillContactForm(mapContactFromApi(data.contact));
     contactModal.show();
   })
-  .catch(() => {
+  .catch(function() {
     showPageMessage("Could not connect to server", true);
   });
-  */
-
-  const contact = allContacts.find(function(c) { return c.id === contactId; });
-  if (!contact) {
-    showPageMessage("Contact not found", true);
-    return;
-  }
-
-  fillContactForm(contact);
-  contactModal.show();
 }
 
 
@@ -172,8 +158,8 @@ function fillContactForm(contact) {
   document.getElementById("modalContactId").value = contact.id;
   document.getElementById("modalFirstName").value = contact.firstName;
   document.getElementById("modalLastName").value = contact.lastName;
-  document.getElementById("modalEmail").value = contact.email;
-  document.getElementById("modalPhone").value = contact.phone;
+  document.getElementById("modalEmail").value = contact.email || "";
+  document.getElementById("modalPhone").value = contact.phone || "";
 }
 
 
@@ -190,26 +176,18 @@ function handleSaveContact() {
   }
 
   const isEditing = id !== "";
+  const url = isEditing
+    ? API_BASE + "/api/contacts/" + id
+    : API_BASE + "/api/contacts";
+  const method = isEditing ? "PUT" : "POST";
 
-  /*
-  const endpoint = isEditing ? "/api/editContact" : "/api/addContact";
-  fetch(API_BASE + endpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + getToken()
-    },
-    body: JSON.stringify({
-      userId: localStorage.getItem("userId"),
-      id: id,
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
-      phone: phone
-    })
+  fetch(url, {
+    method: method,
+    headers: authHeaders(),
+    body: JSON.stringify(mapContactToApi(firstName, lastName, email, phone))
   })
-  .then(res => res.json())
-  .then(data => {
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
     if (data.error) {
       showModalError(data.error);
       return;
@@ -218,37 +196,13 @@ function handleSaveContact() {
     showPageMessage(isEditing ? "Contact updated." : "Contact added.", false);
     handleSearch();
   })
-  .catch(() => {
+  .catch(function() {
     showModalError("Could not connect to server");
   });
-  */
-
-  if (isEditing) {
-    const contact = allContacts.find(function(c) { return c.id === parseInt(id, 10); });
-    if (contact) {
-      contact.firstName = firstName;
-      contact.lastName = lastName;
-      contact.email = email;
-      contact.phone = phone;
-    }
-  } else {
-    const today = new Date().toISOString().slice(0, 10);
-    allContacts.push({
-      id: nextContactId,
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
-      phone: phone,
-      dateCreated: today
-    });
-    nextContactId++;
-  }
-
-  contactModal.hide();
-  showPageMessage(isEditing ? "Contact updated." : "Contact added.", false);
-  handleSearch();
 }
 
+
+//delete
 
 function openDeleteModal(contactId) {
   document.getElementById("deleteContactId").value = contactId;
@@ -257,22 +211,14 @@ function openDeleteModal(contactId) {
 
 
 function confirmDelete() {
-  const id = parseInt(document.getElementById("deleteContactId").value, 10);
+  const id = document.getElementById("deleteContactId").value;
 
-  /*
-  fetch(API_BASE + "/api/deleteContact", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + getToken()
-    },
-    body: JSON.stringify({
-      userId: localStorage.getItem("userId"),
-      id: id
-    })
+  fetch(API_BASE + "/api/contacts/" + id, {
+    method: "DELETE",
+    headers: authHeaders()
   })
-  .then(res => res.json())
-  .then(data => {
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
     if (data.error) {
       showPageMessage(data.error, true);
       return;
@@ -281,24 +227,20 @@ function confirmDelete() {
     showPageMessage("Contact deleted.", false);
     handleSearch();
   })
-  .catch(() => {
+  .catch(function() {
     showPageMessage("Could not connect to server", true);
   });
-  */
-
-  allContacts = allContacts.filter(function(c) { return c.id !== id; });
-
-  deleteModal.hide();
-  showPageMessage("Contact deleted.", false);
-  handleSearch();
 }
 
+//auth
 
 function handleLogout() {
   clearAuth();
   window.location.href = "login.html";
 }
 
+
+//UI feedback
 
 function showPageMessage(message, isError) {
   const el = document.getElementById("pageMessage");
