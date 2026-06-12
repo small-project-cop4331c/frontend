@@ -3,6 +3,8 @@
 let contactModal;
 let deleteModal;
 let searchTimeout = null;
+let currentContacts = [];
+let currentSort = { field: null, direction: "asc" };
 
 
 // helpers 
@@ -32,6 +34,22 @@ function mapContactToApi(firstName, lastName, email, phone) {
     email_address: email,
     phone_number: phone
   };
+}
+
+// (123) 456-7890 style, only for 10 digit numbers
+function formatPhone(phone) {
+  if (!phone) return "";
+
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length !== 10) {
+    return phone;
+  }
+
+  return "(" + digits.slice(0, 3) + ") " + digits.slice(3, 6) + "-" + digits.slice(6);
+}
+
+function stripPhone(phone) {
+  return phone.replace(/\D/g, "");
 }
 
 
@@ -69,7 +87,8 @@ function loadContacts() {
       showPageMessage(data.error, true);
       return;
     }
-    renderContacts(data.contacts.map(mapContactFromApi));
+    currentContacts = data.contacts.map(mapContactFromApi);
+    displayContacts();
   })
   .catch(function() {
     showPageMessage("Could not connect to server", true);
@@ -104,11 +123,36 @@ function handleSearch() {
       showPageMessage(data.error, true);
       return;
     }
-    renderContacts(data.contacts.map(mapContactFromApi));
+    currentContacts = data.contacts.map(mapContactFromApi);
+    displayContacts();
   })
   .catch(function() {
     showPageMessage("Could not connect to server", true);
   });
+}
+
+
+function sortContacts(field, direction) {
+  currentSort.field = field;
+  currentSort.direction = direction;
+  displayContacts();
+}
+
+function displayContacts() {
+  let contacts = currentContacts.slice();
+
+  if (currentSort.field) {
+    contacts.sort(function(a, b) {
+      const valA = (a[currentSort.field] || "").toLowerCase();
+      const valB = (b[currentSort.field] || "").toLowerCase();
+
+      if (valA < valB) return currentSort.direction === "asc" ? -1 : 1;
+      if (valA > valB) return currentSort.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+  }
+
+  renderContacts(contacts);
 }
 
 
@@ -126,7 +170,7 @@ function renderContacts(contacts) {
     rows += "<td>" + c.firstName + "</td>";
     rows += "<td>" + c.lastName + "</td>";
     rows += "<td>" + (c.email || "") + "</td>";
-    rows += "<td>" + (c.phone || "") + "</td>";
+    rows += "<td>" + formatPhone(c.phone) + "</td>";
     rows += '<td>';
     rows += '<button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="openEditModal(' + c.id + ')">Edit</button>';
     rows += '<button type="button" class="btn btn-sm btn-outline-danger" onclick="openDeleteModal(' + c.id + ')">Delete</button>';
@@ -181,7 +225,7 @@ function fillContactForm(contact) {
   document.getElementById("modalFirstName").value = contact.firstName;
   document.getElementById("modalLastName").value = contact.lastName;
   document.getElementById("modalEmail").value = contact.email || "";
-  document.getElementById("modalPhone").value = contact.phone || "";
+  document.getElementById("modalPhone").value = formatPhone(contact.phone);
 }
 
 
@@ -190,7 +234,7 @@ function handleSaveContact() {
   const firstName = document.getElementById("modalFirstName").value.trim();
   const lastName = document.getElementById("modalLastName").value.trim();
   const email = document.getElementById("modalEmail").value.trim();
-  const phone = document.getElementById("modalPhone").value.trim();
+  const phone = stripPhone(document.getElementById("modalPhone").value.trim());
 
   if (firstName === "" || lastName === "" || email === "" || phone === "") {
     showModalError("Please fill in all fields");

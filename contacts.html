@@ -46,6 +46,15 @@
         </div>
     </div>
 
+    <!-- sort -->
+    <div class="mb-3 d-flex flex-wrap align-items-center gap-2">
+        <span class="text-muted small me-1">Sort by:</span>
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="sortContacts('firstName', 'asc')">First Name (A-Z)</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="sortContacts('firstName', 'desc')">First Name (Z-A)</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="sortContacts('lastName', 'asc')">Last Name (A-Z)</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="sortContacts('lastName', 'desc')">Last Name (Z-A)</button>
+    </div>
+
     <!-- page feedback (success/error) -->
     <div id="pageMessage" style="display: none; margin-bottom: 10px;"></div>
 
