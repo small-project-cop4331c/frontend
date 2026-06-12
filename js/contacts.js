@@ -2,6 +2,7 @@
 
 let contactModal;
 let deleteModal;
+let searchTimeout = null;
 
 
 // helpers 
@@ -50,17 +51,44 @@ document.addEventListener("DOMContentLoaded", function() {
   if (fullName) {
     document.getElementById("navUsername").textContent = "Hello, " + fullName;
   }
+
+  loadContacts();
 });
 
 
 //search
 
-// runs when user clicks search or presses enter
+function loadContacts() {
+  fetch(API_BASE + "/api/contacts", {
+    method: "GET",
+    headers: authHeaders()
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    if (data.error) {
+      showPageMessage(data.error, true);
+      return;
+    }
+    renderContacts(data.contacts.map(mapContactFromApi));
+  })
+  .catch(function() {
+    showPageMessage("Could not connect to server", true);
+  });
+}
+
+
+function handleSearchInput() {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(handleSearch, 300);
+}
+
+
+// runs when user clicks search, presses enter, or after debounce delay
 function handleSearch() {
   const query = document.getElementById("searchInput").value.trim();
 
   if (query.length === 0) {
-    renderContacts([]);
+    loadContacts();
     return;
   }
 
@@ -86,12 +114,6 @@ function handleSearch() {
 
 function renderContacts(contacts) {
   const tbody = document.getElementById("contactsTableBody");
-  const query = document.getElementById("searchInput").value.trim();
-
-  if (query.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Search for a contact above</td></tr>';
-    return;
-  }
 
   if (contacts.length === 0) {
     tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No contacts found</td></tr>';

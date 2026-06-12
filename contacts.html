@@ -39,7 +39,8 @@
                 class="form-control"
                 id="searchInput"
                 placeholder="Search by name, email, or phone..."
-                onkeydown="if (event.key === 'Enter') handleSearch()"
+                oninput="handleSearchInput()"
+                onkeydown="if (event.key === 'Enter') { clearTimeout(searchTimeout); handleSearch(); }"
             >
             <button type="button" class="btn btn-primary" onclick="handleSearch()">Search</button>
         </div>
