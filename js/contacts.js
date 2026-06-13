@@ -77,6 +77,8 @@ document.addEventListener("DOMContentLoaded", function() {
     return;
   }
 
+  document.body.style.visibility = "visible";
+
   const fullName = localStorage.getItem("userName");
   if (fullName) {
     document.getElementById("navUsername").textContent = "Hello, " + fullName;
