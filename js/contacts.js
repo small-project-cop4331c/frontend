@@ -15,6 +15,18 @@ function authHeaders() {
 }
 
 
+function apiFetch(url, options) {
+  return fetch(url, options).then(function(res) {
+    if (res.status === 401) {
+      clearAuth();
+      window.location.href = "login.html";
+      return Promise.reject("Unauthorized");
+    }
+    return res.json();
+  });
+}
+
+
 function mapContactFromApi(c) {
   return {
     id: c.id,
@@ -59,11 +71,10 @@ document.addEventListener("DOMContentLoaded", function() {
 //search
 
 function loadContacts() {
-  fetch(API_BASE + "/api/contacts", {
+  apiFetch(API_BASE + "/api/contacts", {
     method: "GET",
     headers: authHeaders()
   })
-  .then(function(res) { return res.json(); })
   .then(function(data) {
     if (data.error) {
       showPageMessage(data.error, true);
@@ -94,11 +105,10 @@ function handleSearch() {
 
   const url = API_BASE + "/api/contacts?search=" + encodeURIComponent(query);
 
-  fetch(url, {
+  apiFetch(url, {
     method: "GET",
     headers: authHeaders()
   })
-  .then(function(res) { return res.json(); })
   .then(function(data) {
     if (data.error) {
       showPageMessage(data.error, true);
@@ -114,27 +124,56 @@ function handleSearch() {
 
 function renderContacts(contacts) {
   const tbody = document.getElementById("contactsTableBody");
+  tbody.textContent = "";
 
   if (contacts.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No contacts found</td></tr>';
+    const tr = document.createElement("tr");
+    const td = document.createElement("td");
+    td.colSpan = 5;
+    td.className = "text-center text-muted";
+    td.textContent = "No contacts found";
+    tr.appendChild(td);
+    tbody.appendChild(tr);
     return;
   }
 
-  let rows = "";
   contacts.forEach(function(c) {
-    rows += "<tr>";
-    rows += "<td>" + c.firstName + "</td>";
-    rows += "<td>" + c.lastName + "</td>";
-    rows += "<td>" + (c.email || "") + "</td>";
-    rows += "<td>" + (c.phone || "") + "</td>";
-    rows += '<td>';
-    rows += '<button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="openEditModal(' + c.id + ')">Edit</button>';
-    rows += '<button type="button" class="btn btn-sm btn-outline-danger" onclick="openDeleteModal(' + c.id + ')">Delete</button>';
-    rows += "</td>";
-    rows += "</tr>";
-  });
+    const tr = document.createElement("tr");
 
-  tbody.innerHTML = rows;
+    ["firstName", "lastName"].forEach(function(field) {
+      const td = document.createElement("td");
+      td.textContent = c[field];
+      tr.appendChild(td);
+    });
+
+    const emailTd = document.createElement("td");
+    emailTd.textContent = c.email || "";
+    tr.appendChild(emailTd);
+
+    const phoneTd = document.createElement("td");
+    phoneTd.textContent = c.phone || "";
+    tr.appendChild(phoneTd);
+
+    const actionsTd = document.createElement("td");
+
+    const editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.className = "btn btn-sm btn-outline-primary me-1";
+    editBtn.textContent = "Edit";
+    editBtn.addEventListener("click", function() { openEditModal(c.id); });
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.type = "button";
+    deleteBtn.className = "btn btn-sm btn-outline-danger";
+    deleteBtn.textContent = "Delete";
+    deleteBtn.addEventListener("click", function() { openDeleteModal(c.id); });
+
+    actionsTd.appendChild(editBtn);
+    actionsTd.appendChild(deleteBtn);
+    tr.appendChild(actionsTd);
+
+    tbody.appendChild(tr);
+  });
 }
 
 
@@ -157,11 +196,10 @@ function openEditModal(contactId) {
   document.getElementById("contactModalLabel").textContent = "Edit Contact";
   hideModalError();
 
-  fetch(API_BASE + "/api/contacts/" + contactId, {
+  apiFetch(API_BASE + "/api/contacts/" + contactId, {
     method: "GET",
     headers: authHeaders()
   })
-  .then(function(res) { return res.json(); })
   .then(function(data) {
     if (data.error) {
       showPageMessage(data.error, true);
@@ -203,12 +241,11 @@ function handleSaveContact() {
     : API_BASE + "/api/contacts";
   const method = isEditing ? "PUT" : "POST";
 
-  fetch(url, {
+  apiFetch(url, {
     method: method,
     headers: authHeaders(),
     body: JSON.stringify(mapContactToApi(firstName, lastName, email, phone))
   })
-  .then(function(res) { return res.json(); })
   .then(function(data) {
     if (data.error) {
       showModalError(data.error);
@@ -235,11 +272,10 @@ function openDeleteModal(contactId) {
 function confirmDelete() {
   const id = document.getElementById("deleteContactId").value;
 
-  fetch(API_BASE + "/api/contacts/" + id, {
+  apiFetch(API_BASE + "/api/contacts/" + id, {
     method: "DELETE",
     headers: authHeaders()
   })
-  .then(function(res) { return res.json(); })
   .then(function(data) {
     if (data.error) {
       showPageMessage(data.error, true);
