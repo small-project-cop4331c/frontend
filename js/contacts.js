@@ -64,6 +64,18 @@ function stripPhone(phone) {
   return phone.replace(/\D/g, "");
 }
 
+function handlePhoneInput() {
+  const input = document.getElementById("modalPhone");
+  const digits = input.value.replace(/\D/g, "").slice(0, 10);
+
+  let formatted = "";
+  if (digits.length > 0) formatted = "(" + digits.slice(0, 3);
+  if (digits.length >= 4) formatted += ") " + digits.slice(3, 6);
+  if (digits.length >= 7) formatted += "-" + digits.slice(6, 10);
+
+  input.value = formatted;
+}
+
 
 //init
 
@@ -290,7 +302,7 @@ function handleSaveContact() {
   apiFetch(url, {
     method: method,
     headers: authHeaders(),
-    body: JSON.stringify(mapContactToApi(firstName, lastName, email, phone))
+    body: JSON.stringify(mapContactToApi(firstName, lastName, email, stripPhone(phone)))
   })
   .then(function(data) {
     if (data.error) {
