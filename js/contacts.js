@@ -361,11 +361,11 @@ function handleLogout() {
 function showPageMessage(message, isError) {
   const el = document.getElementById("pageMessage");
   el.textContent = message;
-  el.style.color = isError ? "red" : "green";
-  el.style.display = "block";
+  el.className = isError ? "msg-error show" : "msg-success show";
 
   setTimeout(function() {
-    el.style.display = "none";
+    el.className = "";
+    el.textContent = "";
   }, 3000);
 }
 

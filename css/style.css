@@ -1,10 +1,331 @@
-/* custom styles */
+/* underwater theme */
+
+:root {
+    --ocean-deep: #021824;
+    --ocean-mid: #0a3d52;
+    --ocean-teal: #145a6b;
+    --foam: #c5e8f0;
+    --foam-dim: #8ec4d4;
+    --panel: rgba(8, 45, 58, 0.92);
+    --panel-border: rgba(120, 210, 230, 0.22);
+    --coral: #ff6b47;
+    --coral-hover: #ff8566;
+    --sea-green: #2ecc8a;
+    --danger: #ff4d6d;
+}
 
 body {
-    background-color: #f8f9fa;
+    min-height: 100vh;
+    background: linear-gradient(165deg, var(--ocean-deep) 0%, #063a4a 40%, var(--ocean-mid) 70%, #042530 100%);
+    background-attachment: fixed;
+    color: var(--foam);
+    position: relative;
 }
+
+/* bubbles, fixed so it doesn't scroll */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 12% 80%, rgba(255, 255, 255, 0.06) 0 8px, transparent 9px),
+        radial-gradient(circle at 78% 65%, rgba(255, 255, 255, 0.05) 0 12px, transparent 13px),
+        radial-gradient(circle at 45% 25%, rgba(255, 255, 255, 0.04) 0 6px, transparent 7px),
+        radial-gradient(circle at 88% 15%, rgba(255, 255, 255, 0.05) 0 10px, transparent 11px),
+        radial-gradient(circle at 25% 40%, rgba(255, 255, 255, 0.03) 0 14px, transparent 15px);
+    z-index: 0;
+}
+
+/* shark png */
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    filter: invert(1) opacity(0.13);
+    background-image:
+        url("../images/shark.png"),
+        url("../images/shark.png"),
+        url("../images/shark.png"),
+        url("../images/shark.png"),
+        url("../images/shark.png"),
+        url("../images/shark.png");
+    background-repeat: no-repeat;
+    background-size:
+        160px auto,
+        110px auto,
+        200px auto,
+        85px auto,
+        130px auto,
+        175px auto;
+    background-position:
+        5% 78%,
+        90% 20%,
+        50% 92%,
+        78% 50%,
+        12% 10%,
+        60% 35%;
+    animation: sharks-swim 100s ease-in-out infinite alternate;
+}
+
+@keyframes sharks-swim {
+    from {
+        background-position:
+            5% 78%,
+            90% 20%,
+            50% 92%,
+            78% 50%,
+            12% 10%,
+            60% 35%;
+    }
+    to {
+        background-position:
+            9% 73%,
+            86% 26%,
+            54% 88%,
+            74% 54%,
+            16% 14%,
+            56% 39%;
+    }
+}
+
+body > .container {
+    position: relative;
+    z-index: 1;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #e8f6fa;
+}
+
+.text-muted {
+    color: var(--foam-dim) !important;
+}
+
+/* --- auth panel (login page) --- */
 
 .tab-content.border {
-    background-color: #fff;
+    background-color: var(--panel);
+    border-color: var(--panel-border) !important;
+    backdrop-filter: blur(6px);
 }
 
+.nav-tabs {
+    border-bottom-color: var(--panel-border);
+}
+
+.nav-tabs .nav-link {
+    color: var(--foam-dim);
+    border-color: transparent;
+    background: rgba(4, 30, 40, 0.6);
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--foam);
+    border-color: var(--panel-border);
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--foam);
+    background-color: var(--panel);
+    border-color: var(--panel-border) var(--panel-border) var(--panel);
+}
+
+/* --- forms --- */
+
+.form-label {
+    color: var(--foam);
+}
+
+.form-control {
+    background-color: rgba(2, 24, 36, 0.7);
+    border-color: rgba(120, 200, 220, 0.35);
+    color: var(--foam);
+}
+
+.form-control::placeholder {
+    color: rgba(142, 196, 212, 0.55);
+}
+
+.form-control:focus {
+    background-color: rgba(2, 24, 36, 0.85);
+    border-color: var(--foam-dim);
+    color: var(--foam);
+    box-shadow: 0 0 0 0.2rem rgba(120, 210, 230, 0.2);
+}
+
+/* --- buttons (orange color) --- */
+
+.btn-primary {
+    background-color: var(--coral);
+    border-color: var(--coral);
+    color: #fff;
+    font-weight: 600;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: var(--coral-hover);
+    border-color: var(--coral-hover);
+    color: #fff;
+}
+
+.btn-success {
+    background-color: var(--sea-green);
+    border-color: var(--sea-green);
+    color: #042530;
+    font-weight: 600;
+}
+
+.btn-success:hover,
+.btn-success:focus {
+    background-color: #45d997;
+    border-color: #45d997;
+    color: #042530;
+}
+
+.btn-outline-secondary {
+    color: var(--foam);
+    border-color: rgba(120, 200, 220, 0.45);
+}
+
+.btn-outline-secondary:hover,
+.btn-outline-secondary:focus {
+    background-color: rgba(120, 200, 220, 0.15);
+    border-color: var(--foam-dim);
+    color: var(--foam);
+}
+
+.btn-outline-primary {
+    color: #7dd3fc;
+    border-color: #7dd3fc;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    background-color: rgba(125, 211, 252, 0.15);
+    color: #bae6fd;
+    border-color: #bae6fd;
+}
+
+.btn-outline-danger {
+    color: #ff8fa3;
+    border-color: #ff8fa3;
+}
+
+.btn-outline-danger:hover,
+.btn-outline-danger:focus {
+    background-color: rgba(255, 77, 109, 0.15);
+    color: #ffb3c1;
+    border-color: #ffb3c1;
+}
+
+.btn-secondary {
+    background-color: rgba(120, 200, 220, 0.2);
+    border-color: rgba(120, 200, 220, 0.35);
+    color: var(--foam);
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus {
+    background-color: rgba(120, 200, 220, 0.3);
+    border-color: var(--foam-dim);
+    color: var(--foam);
+}
+
+.btn-danger {
+    background-color: var(--danger);
+    border-color: var(--danger);
+    color: #fff;
+}
+
+.btn-danger:hover,
+.btn-danger:focus {
+    background-color: #ff6680;
+    border-color: #ff6680;
+    color: #fff;
+}
+
+.btn-sm {
+    font-weight: 500;
+}
+
+/* --- contacts table --- */
+
+.table-responsive.border {
+    background-color: var(--panel);
+    border-color: var(--panel-border) !important;
+    backdrop-filter: blur(6px);
+}
+
+.table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--foam);
+    --bs-table-border-color: rgba(120, 200, 220, 0.2);
+    --bs-table-hover-bg: rgba(120, 200, 220, 0.08);
+    --bs-table-hover-color: var(--foam);
+    margin-bottom: 0;
+}
+
+.table thead.table-light {
+    --bs-table-bg: rgba(4, 35, 48, 0.9);
+    --bs-table-color: #e8f6fa;
+}
+
+.table-bordered > :not(caption) > * > * {
+    border-color: rgba(120, 200, 220, 0.2);
+}
+
+/* --- modals --- */
+
+.modal-content {
+    background-color: var(--panel);
+    border-color: var(--panel-border);
+    color: var(--foam);
+}
+
+.modal-header {
+    border-bottom-color: var(--panel-border);
+}
+
+.modal-footer {
+    border-top-color: var(--panel-border);
+}
+
+.modal-title {
+    color: #e8f6fa;
+}
+
+.btn-close {
+    filter: invert(1) brightness(1.5);
+}
+
+/* --- feedback messages --- */
+
+.msg-error,
+.msg-success {
+    margin-bottom: 10px;
+}
+
+.msg-error {
+    color: #ff8fa3;
+}
+
+.msg-success {
+    color: var(--sea-green);
+}
+
+.msg-error:not(.show) {
+    display: none;
+}
+
+.msg-success:not(.show) {
+    display: none;
+}
+
+#pageMessage.msg-error.show,
+#pageMessage.msg-success.show {
+    display: block;
+}
