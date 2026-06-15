@@ -237,6 +237,12 @@ function renderContacts(contacts) {
 
 //add / edit modal
 
+function clearModalInvalid() {
+  ["modalFirstName", "modalLastName", "modalEmail", "modalPhone"].forEach(function(id) {
+    document.getElementById(id).classList.remove("is-invalid");
+  });
+}
+
 function openAddModal() {
   document.getElementById("contactModalLabel").textContent = "Add Contact";
   document.getElementById("modalContactId").value = "";
@@ -245,6 +251,7 @@ function openAddModal() {
   document.getElementById("modalEmail").value = "";
   document.getElementById("modalPhone").value = "";
   hideModalError();
+  clearModalInvalid();
 
   contactModal.show();
 }
@@ -264,6 +271,7 @@ function openEditModal(contactId) {
       return;
     }
     fillContactForm(mapContactFromApi(data.contact));
+    clearModalInvalid();
     contactModal.show();
   })
   .catch(function() {
@@ -288,7 +296,20 @@ function handleSaveContact() {
   const email = document.getElementById("modalEmail").value.trim();
   const phone = stripPhone(document.getElementById("modalPhone").value.trim());
 
+  const modalFields = [
+    { id: "modalFirstName", val: firstName },
+    { id: "modalLastName",  val: lastName },
+    { id: "modalEmail",     val: email },
+    { id: "modalPhone",     val: phone }
+  ];
+  modalFields.forEach(function(f) {
+    document.getElementById(f.id).classList.remove("is-invalid");
+  });
+
   if (firstName === "" || lastName === "" || email === "" || phone === "") {
+    modalFields.forEach(function(f) {
+      if (f.val === "") document.getElementById(f.id).classList.add("is-invalid");
+    });
     showModalError("Please fill in all fields");
     return;
   }

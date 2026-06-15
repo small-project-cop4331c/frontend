@@ -34,12 +34,16 @@ async function handleLogin() {
   const password = document.getElementById("loginPassword").value;
   const loginError = document.getElementById("loginError");
 
-  // clear old message
+  // clear old message and field errors
   loginError.textContent = "";
   loginError.style.display = "none";
+  document.getElementById("loginEmail").classList.remove("is-invalid");
+  document.getElementById("loginPassword").classList.remove("is-invalid");
 
   // basic check
   if (email === "" || password === "") {
+    if (email === "") document.getElementById("loginEmail").classList.add("is-invalid");
+    if (password === "") document.getElementById("loginPassword").classList.add("is-invalid");
     loginError.textContent = "Please type an email and password";
     loginError.style.display = "block";
     return;
@@ -95,11 +99,22 @@ async function handleRegister() {
   const registerError = document.getElementById("registerError");
   const registerSuccess = document.getElementById("registerSuccess");
 
-  // clear old message
+  // clear old message and field errors
   registerError.textContent = "";
   registerError.style.display = "none";
   registerSuccess.textContent = "";
   registerSuccess.style.display = "none";
+
+  const regFields = [
+    { id: "regFirstName", val: firstName },
+    { id: "regLastName",  val: lastName },
+    { id: "regEmail",     val: email },
+    { id: "regPassword",  val: password },
+    { id: "regConfirm",   val: confirmPassword }
+  ];
+  regFields.forEach(function(f) {
+    document.getElementById(f.id).classList.remove("is-invalid");
+  });
 
   // checks before sending to API
   if (
@@ -109,6 +124,9 @@ async function handleRegister() {
     password === "" ||
     confirmPassword === ""
   ) {
+    regFields.forEach(function(f) {
+      if (f.val === "") document.getElementById(f.id).classList.add("is-invalid");
+    });
     registerError.textContent = "Please fill out all fields";
     registerError.style.display = "block";
     return;
